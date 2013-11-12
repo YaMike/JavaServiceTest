@@ -13,13 +13,12 @@
 #include <android/asset_manager_jni.h>
 
 JavaVM *jvm = NULL;
-jobject jObj;
 jclass  jCls;
 
 static int run = 0;
 static pthread_t t;
 
-void callVoidMethodString(JNIEnv *env, jobject jcl, jmethodID jmid, const char *str);
+void callVoidMethodString(JNIEnv *env, jclass jcl, jmethodID jmid, const char *str);
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *ajvm, void *dummy) {
 	return JNI_VERSION_1_6;
@@ -33,7 +32,7 @@ void *thread_func(void *dummy) {
 			DBG_INFO("Cannot attach JNIEnv!\n");
 		}
 	}
-	//jCls = (*env)->GetObjectClass(env, jObj);
+
 	jmethodID jmid = (*env)->GetMethodID(env, jCls, "stringJavaMethod", "(Ljava/lang/String;)V");
 	if (!jmid) {
 		DBG_ERR("Cannot find java method...Terminating\n");
@@ -53,7 +52,7 @@ void *thread_func(void *dummy) {
 
 JNIEXPORT void JNICALL
 Java_com_example_testservice_TestNative_startAthread( JNIEnv* env,
-		jobject thiz)
+		jclass thiz)
 {
 	DBG_INFO("enter startAthread()\n");
 	if (JNI_OK != (*env)->GetJavaVM(env, &jvm)) {
@@ -61,29 +60,14 @@ Java_com_example_testservice_TestNative_startAthread( JNIEnv* env,
 		return;
 	}
 	DBG_INFO("Caching object TestNative...\n");
-	jObj = thiz;
-	jobject globalRef = (*env)->NewGlobalRef(env, jObj);
-	(*env)->DeleteLocalRef(env, jObj);
-	jObj = globalRef;
-	if (NULL == jObj) {
+	jCls = thiz;
+	jclass globalRef = (*env)->NewGlobalRef(env, jCls);
+	(*env)->DeleteLocalRef(env, jCls);
+	jCls = globalRef;
+	if (NULL == jCls) {
 		DBG_ERR("Cannot cache class TestNative!\n");
 		return;
 	}
-
-	DBG_INFO("Caching class TestNative...\n");
-	jclass clazz = (*env)->FindClass(env, "com/example/testservice/TestNative");
-    if ((*env)->ExceptionCheck(env) == JNI_TRUE){
-        (*env)->ExceptionDescribe(env);
-        DBG_ERR("Exception while looking for TestNative class.\n");
-        return;
-    }
-    jCls = (jclass)(*env)->NewGlobalRef(env, clazz);
-    if ((*env)->ExceptionCheck(env) == JNI_TRUE){
-        (*env)->ExceptionDescribe(env);
-        DBG_ERR("Exception while trying to globalize TestNative class.\n");
-        return;
-    }
-    (*env)->DeleteLocalRef(env, clazz);
 
 	if (pthread_create(&t, NULL, thread_func, NULL)) {
 		DBG_ERR("Cannot create thread!\n");
@@ -92,7 +76,7 @@ Java_com_example_testservice_TestNative_startAthread( JNIEnv* env,
 
 static unsigned call_count = 0;
 
-void callVoidMethodString(JNIEnv *env, jobject jcl, jmethodID jmid, const char *str) {
+void callVoidMethodString(JNIEnv *env, jclass jcl, jmethodID jmid, const char *str) {
 	jstring jstr = (*env)->NewStringUTF(env, str);
 	char calls_str[50] = {0};
 	sprintf(calls_str, "calls:%u\n", call_count++);
