@@ -75,10 +75,6 @@ public class TestService extends Service {
         mServiceHandler = new ServiceHandler(mServiceLooper);
     }
 
-//    @Override
-//    public int onStartCommand(Intent intent, int flags, int onStartId)  {
-//    	return 0;
-//    }
     @Override
     public void onStart(Intent intent, int startid)
     { 	

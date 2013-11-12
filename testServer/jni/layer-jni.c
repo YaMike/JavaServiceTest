@@ -14,6 +14,7 @@
 
 JavaVM *jvm = NULL;
 jobject jObj;
+jclass  jCls;
 
 static int run = 0;
 static pthread_t t;
@@ -32,9 +33,11 @@ void *thread_func(void *dummy) {
 			DBG_INFO("Cannot attach JNIEnv!\n");
 		}
 	}
-	jmethodID jmid = (*env)->GetMethodID(env, jObj, "stringJavaMethod", "(Ljava/lang/String;)V");
+	//jCls = (*env)->GetObjectClass(env, jObj);
+	jmethodID jmid = (*env)->GetMethodID(env, jCls, "stringJavaMethod", "(Ljava/lang/String;)V");
 	if (!jmid) {
 		DBG_ERR("Cannot find java method...Terminating\n");
+		(*jvm)->DetachCurrentThread(jvm);
 		return NULL;
 	}
 
@@ -42,7 +45,7 @@ void *thread_func(void *dummy) {
 		struct timespec ts = {.tv_sec = 1, .tv_nsec = 0 };
 		nanosleep(&ts, NULL);
 		DBG_INFO("Trying to call method\n");
-		callVoidMethodString(env, jObj, jmid, "***** Native2Java call works! *****\n");
+		callVoidMethodString(env, jCls, jmid, "***** Native2Java call works! *****\n");
 	}
 	(*jvm)->DetachCurrentThread(jvm);
 	return NULL;
@@ -57,15 +60,31 @@ Java_com_example_testservice_TestNative_startAthread( JNIEnv* env,
 		DBG_ERR("Cannot access Java VM! Terminating call.\n");
 		return;
 	}
-	DBG_INFO("Caching class tc...\n");
+	DBG_INFO("Caching object TestNative...\n");
 	jObj = thiz;
 	jobject globalRef = (*env)->NewGlobalRef(env, jObj);
 	(*env)->DeleteLocalRef(env, jObj);
 	jObj = globalRef;
 	if (NULL == jObj) {
-		DBG_ERR("Cannot cache class TronNative!\n");
+		DBG_ERR("Cannot cache class TestNative!\n");
 		return;
 	}
+
+	DBG_INFO("Caching class TestNative...\n");
+	jclass clazz = (*env)->FindClass(env, "com/example/testservice/TestNative");
+    if ((*env)->ExceptionCheck(env) == JNI_TRUE){
+        (*env)->ExceptionDescribe(env);
+        DBG_ERR("Exception while looking for TestNative class.\n");
+        return;
+    }
+    jCls = (jclass)(*env)->NewGlobalRef(env, clazz);
+    if ((*env)->ExceptionCheck(env) == JNI_TRUE){
+        (*env)->ExceptionDescribe(env);
+        DBG_ERR("Exception while trying to globalize TestNative class.\n");
+        return;
+    }
+    (*env)->DeleteLocalRef(env, clazz);
+
 	if (pthread_create(&t, NULL, thread_func, NULL)) {
 		DBG_ERR("Cannot create thread!\n");
 	}
