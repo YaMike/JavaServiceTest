@@ -21,6 +21,7 @@ public class TestNative implements TestListener {
 
 	@Override
 	public void stringJavaMethod(final String regStr) {
+		Log.d(TAG, "IT WORKS?" + regStr);
 		mHandler.post(new Runnable() {
 			public void run() {
 				Log.e(TAG, "CALLED!\n");

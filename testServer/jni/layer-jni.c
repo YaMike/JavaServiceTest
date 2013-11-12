@@ -32,12 +32,13 @@ void *thread_func(void *dummy) {
 			DBG_INFO("Cannot attach JNIEnv!\n");
 		}
 	}
+	jmethodID jmid = (*env)->GetMethodID(env, jObj, "stringJavaMethod", "(Ljava/lang/String;)V");
+	if (!jmid) {
+		DBG_ERR("Cannot find java method...Terminating\n");
+		return NULL;
+	}
+
 	while(run) {
-		jmethodID jmid = (*env)->GetMethodID(env, jObj, "stringJavaMethod", "(Ljava/lang/String;)V");
-		if (!jmid) {
-			DBG_ERR("Cannot find java method...Terminating\n");
-			return NULL;
-		}
 		struct timespec ts = {.tv_sec = 1, .tv_nsec = 0 };
 		nanosleep(&ts, NULL);
 		DBG_INFO("Trying to call method\n");
