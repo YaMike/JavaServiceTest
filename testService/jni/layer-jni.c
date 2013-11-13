@@ -33,10 +33,14 @@ void *thread_func(void *dummy) {
 			DBG_INFO("Cannot attach JNIEnv!\n");
 		}
 	}
-
-	jmethodID jmid = (*env)->GetMethodID(env, jObj, "stringJavaMethod", "(Ljava/lang/String;)V");
-	if (!jmid) {
-		DBG_ERR("Cannot find java method...Terminating\n");
+	jclass jcls = (*env)->GetObjectClass(env, jObj);
+	if (NULL == jcls) {
+		DBG_ERR("Cannot obtain class from object! Terminating!\n");
+		return NULL;
+	}
+	jmethodID jmid = (*env)->GetMethodID(env, jcls, "stringJavaMethod", "(Ljava/lang/String;)V");
+	if (NULL == jmid) {
+		DBG_ERR("Cannot find java method! Terminating\n");
 		(*jvm)->DetachCurrentThread(jvm);
 		return NULL;
 	}
@@ -44,7 +48,6 @@ void *thread_func(void *dummy) {
 	while(run) {
 		struct timespec ts = {.tv_sec = 1, .tv_nsec = 0 };
 		nanosleep(&ts, NULL);
-		DBG_INFO("Trying to call method\n");
 		callVoidMethodString(env, jObj, jmid, "Native2Java call works!\n");
 	}
 
@@ -73,12 +76,12 @@ Java_com_example_testservice_TestNative_startAthread(JNIEnv* env, jobject thiz) 
 	}
 }
 
-static unsigned call_count = 0;
+static unsigned int calls_count = 0;
 
 void callVoidMethodString(JNIEnv *env, jobject jobj, jmethodID jmid, const char *str) {
 	jstring jstr = (*env)->NewStringUTF(env, str);
 	char calls_str[50] = {0};
-	sprintf(calls_str, "calls:%u\n", call_count++);
+	sprintf(calls_str, "calls:%u\n", calls_count++);
 	(*env)->CallVoidMethod(env, jobj, jmid, jstr);
 	if ((*env)->ExceptionCheck(env)) {
 		DBG_ERR("There is some exceptional situation!\n");
