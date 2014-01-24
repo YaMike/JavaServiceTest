@@ -146,7 +146,7 @@ public class MainActivity extends Activity {
 		@Override
 		protected void onPostExecute(String result) {
 	        if (result != null) {
-	            m_textView.append(this.getClass().getName() + ": read content: " + result);
+	            m_textView.append(this.getClass().getName() + ": read content:\n" + result);
 	        }
 		}
 	}
@@ -159,8 +159,8 @@ public class MainActivity extends Activity {
 			String text = new String();
 			try {
 				mifare.connect();
-				for (int i = 0; i < 16; i++) {
-					byte[] bytes = mifare.readPages(i);
+				for (int i = 0; i < 4; i++) {
+					byte[] bytes = mifare.readPages(4*i);
 					text += bytesToHex(bytes) + "\n";
 				}
 				return text;
