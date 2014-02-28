@@ -10,3 +10,6 @@ Java method via JNI each second.
 
 Starter Application. Used just to quickly 
 start Java service.
+
+nfctest application is a simple test demonstrating
+how to work with nfc in android (mifare-ultralight).
