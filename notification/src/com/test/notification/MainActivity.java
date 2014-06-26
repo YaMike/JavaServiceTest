@@ -6,6 +6,7 @@ import com.test.notification.notification.iNotiController;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -79,6 +80,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		Button errorButton			= (Button)findViewById(R.id.errorBtn		);
 		Button showButton			= (Button)findViewById(R.id.show			);
 		Button hideButton 			= (Button)findViewById(R.id.hide			);
+		Button stopButton			= (Button)findViewById(R.id.stop			);
 		
 		m_tview 				= (TextView)findViewById(R.id.textView1		);
 		
@@ -88,6 +90,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		errorButton.setOnClickListener			(this);
 		showButton.setOnClickListener			(this);
 		hideButton.setOnClickListener			(this);
+		stopButton.setOnClickListener			(this);
 		
 	}
 
@@ -121,6 +124,10 @@ public class MainActivity extends Activity implements OnClickListener {
 		case R.id.hide:
 		{
 			notiController.hide();
+		}	break;
+		case R.id.stop:
+		{
+			notiController.stopSound();
 		}	break;
 		default:
 		{

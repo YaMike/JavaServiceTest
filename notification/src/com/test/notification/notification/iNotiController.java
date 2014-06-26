@@ -9,5 +9,7 @@ public interface iNotiController {
 	public void hide();
 	
 	public void processIntent(Intent intent);
+	
 	public void updateState(State state, String subtitle);
+	public void stopSound();
 }
