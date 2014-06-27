@@ -14,3 +14,6 @@ Used just to quickly start Java service.
 Android Java nfctest application (nfctest).
 nfctest application is a simple test demonstrating
 how to work with nfc in android (mifare-ultralight).
+
+Android notification test.
+Shows notification with two buttons with callbacks.
